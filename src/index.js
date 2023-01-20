@@ -23,11 +23,8 @@ class Square extends React.Component {
 */
 
 function SquareF(props) {
-  function handleClick() {
-    props.handleFunction(props.id);
-  }
   return (
-    <button className="square" onClick={handleClick}>
+    <button className="square" onClick={props.handleClick}>
       {props.value}
     </button>
   );
@@ -37,7 +34,14 @@ class Board extends React.Component {
   constructor(props) {
     super(props);
     this.state = { player: "X", squares: Array(9).fill(null) };
-    this.nextTurn = this.nextTurn.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick(id) {
+    let updatedSquares = this.state.squares.slice();
+    updatedSquares[id] = this.state.player;
+    let updatedPlayer = this.state.player === "X" ? "O" : "X";
+    this.setState({ player: updatedPlayer, squares: updatedSquares });
   }
 
   renderSquare(i) {
@@ -45,16 +49,9 @@ class Board extends React.Component {
       <SquareF
         id={i}
         value={this.state.squares[i]}
-        handleFunction={!calculateWinner(this.state.squares) ? this.nextTurn : null}
+        handleClick={!calculateWinner(this.state.squares) ? this.handleClick.bind(this, i) : null}
       />
     );
-  }
-
-  nextTurn(id) {
-    let updatedSquares = this.state.squares.slice();
-    updatedSquares[id] = this.state.player;
-    let updatedPlayer = this.state.player === "X" ? "O" : "X";
-    this.setState({ player: updatedPlayer, squares: updatedSquares });
   }
 
   render() {
