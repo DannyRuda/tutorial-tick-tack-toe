@@ -68,30 +68,46 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
+    this.jumpTo.bind(this);
     this.state = {
       history: [{ squares: Array(9).fill(null) }],
       player: "X",
+      stepNumber: 0
     };
   }
 
   handleClick(id) {
-    const history = this.state.history;
+    const history = this.state.history.slice(0,this.state.stepNumber+1);
     const current = history[history.length - 1];
     const winner = calculateWinner(current.squares);
-    if (winner) {
+    let updatedSquares = current.squares.slice();
+    if (winner || updatedSquares[id]) {
       return;
     }
-    let updatedSquares = current.squares.slice();
     updatedSquares[id] = this.state.player;
     let updatedPlayer = this.state.player === "X" ? "O" : "X";
+    const stepNumber = this.state.stepNumber;
     this.setState({
       player: updatedPlayer,
       history: history.concat([{ squares: updatedSquares }]),
+      stepNumber:  stepNumber + 1,
     });
   }
+
+  jumpTo(moveNumber) {
+    this.setState({stepNumber:moveNumber, player: moveNumber % 2 ? "O" : "X"})
+  }
+
   render() {
     const history = this.state.history;
-    const current = history[history.length - 1];
+    const current = history[this.state.stepNumber];
+
+    const moves = history.map((move,moveNumber)=>{
+      const text = moveNumber ? 'Jump to Round ' + moveNumber : 'Jump to Game Start'
+      return (
+        <li key={moveNumber}><button onClick={this.jumpTo.bind(this,moveNumber)}>{text}</button></li>
+      )
+    })
     let status = <div className="status">Next Player: {this.state.player}</div>;
     const winner = calculateWinner(current.squares);
     if (winner) {
@@ -110,7 +126,7 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{/* TODO */}</ol>
+          <ol>{moves}</ol>
         </div>
       </div>
     );
